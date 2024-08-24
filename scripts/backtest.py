@@ -3,6 +3,7 @@ from plot_backtest import plot_backtest
 from trade import Trade
 import pandas as pd
 
+#test
 previous_price = None
 previous_ema_200 = None
 previous_resistance = None
