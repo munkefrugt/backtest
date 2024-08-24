@@ -1,0 +1,45 @@
+TODO
+
+tanker:
+Vigtigt der skal være 100 handler!! ellers opstår der analisis paralisis. 
+der skal også være daily trend. op. min golden cross + (HMA positive slope?)
+
+køb
+der er noget med hypotesen der ikke er færdig. 
+hypotesen er at hvis bryder ud af resistance level så køb. 
+men det er bare ikke det den gør. den gør det kun nogle gange. 
+nøglen er nok at den skal være steget lidt over breakout men ikke for meget.
+og det skal være ok at det sker over nogle bars, 
+alså der skal ikke samlignes med den forige close udelukkende. 
+
+måske er det også en god ide at bruge flere HMA's 
+og ydeligere bør der nok også være en analyse af daily data,
+for at få styr på den overordnede trend. 
+hvad med pyramidding?
+
+sell
+der bør nok også være en form for moving stoploss.
+så snart man er over er en vis procent over buyprice er det nok smart at starte en trailing stop. 
+måske noget med at man skal break even. så hurtigt som muligt. når man er 5 procent over buy price. 
+og så lad resten forsøge at nå så højt som muligt?
+
+overordnet:
+der skal være 100 handler ellers kan du ikke sige noget om strategien. 
+så vil du blive ved med at kører i ring og lede efter en ny strategi. 
+brug derfor minut aktie data fra s&p 500 aktier i stedet. 
+de første 20 aktier burde være nok til at give 100 handler med bare en uges data. 
+men det er supervigtigt at der er forskellige over ordnede trenddata. både op ned og sidelens eller hvad?
+måske er det bare vigtigt at det filter der er ikke handler i sidelens market. 
+
+metrics: 
+drawdown
+sharpe ratio? 
+sammenlign med buy and hold sp500, benchmark
+average win percentage. 
+winner's vs loosers. (giver det kun mening hvis der er en Risk/reward ratio?, kan den laves)
+    man kan jo i teorien have en vinder ud af 100 der bare vinder for vildt. 
+looser in a row. 
+
+nice to have:
+hvis der er mere en 2 loosers in a row. sæt risk ned. exponentielt per kommende tabt handel.
+ og når der kommer en vinder så så risk til bage til default. 
