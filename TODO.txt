@@ -1,4 +1,5 @@
 TODO in prioritized order:
+
 1.- auto requirement.txt to github.. 
 2. - more data- 10 stocks from s&p 500. get 100 trades minimum. minute timeframe
 3 - get daily data to determine trend.
