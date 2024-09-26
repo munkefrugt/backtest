@@ -111,7 +111,7 @@ def filter_data_by_ema_slope(df):
 
 # Usage:
 df = load_old_training_data()
-df = df.tail(10000)  # Process last 10,000 rows for example
+df = df.tail(15000)  # Process last 10,000 rows for example
 df = filter_data_by_ema_slope(df)
 
 simulator = BacktestSimulator(initial_cash=1000)
