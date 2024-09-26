@@ -1,0 +1,120 @@
+import pandas as pd
+import numpy as np
+from trade import Trade
+from plot_backtest import plot_backtest
+
+class BacktestSimulator:
+    def __init__(self, initial_cash):
+        self.previous_ema_5000 = None
+        self.previous_ema_20000 = None
+        self.cash = initial_cash
+        self.equity = None
+        self.trades = []
+        self.buy_signals = []
+        self.sell_signals = []
+        self.cash_equity_records = []
+
+    def run_backtest(self, df):
+        # Process each row in the DataFrame
+        df['equity'] = self.cash
+        for index, row in df.iterrows():
+            self.row_simulator(row)
+        return df, pd.DataFrame(self.cash_equity_records, columns=['date', 'cash', 'equity', 'position'])
+
+    def calculate_position_size(self, equity, cash, current_price, stop_loss, risk_percentage=0.02):
+        risk_amount = equity * risk_percentage
+        risk_per_share = current_price - stop_loss
+        position_size_risk = risk_amount / risk_per_share
+        position_size_cash = cash / current_price
+        final_position_size = min(position_size_risk, position_size_cash)
+        return final_position_size
+
+    def row_simulator(self, row):
+        current_time = row['date']
+        current_price = row['close']
+        current_ema_5000 = row['EMA_5000']
+        current_ema_20000 = row['EMA_20000']
+        symbol = "BTC-USD"
+        
+        # Ichimoku components
+        chikou = row['ichimoku_chikou_line']
+        senkou_a = row['ichimoku_a']
+        senkou_b = row['ichimoku_b']
+
+        # Update equity
+        equity = self.cash
+        for open_trade in self.trades:
+            if open_trade.status == 'open':
+                value_of_position = open_trade.position_size * current_price
+                equity += value_of_position
+
+        # Buy logic based on Ichimoku
+        if self.cash >= 1:
+            if chikou > current_price and current_price > max(senkou_a, senkou_b) and senkou_a > senkou_b:
+                trade_id = len(self.trades) + 1
+                stop_loss = min(senkou_a, senkou_b)  # Set stop loss below the cloud
+                position_size = self.calculate_position_size(equity, self.cash, current_price, stop_loss, risk_percentage=0.02)
+                trade = Trade(trade_id, symbol, current_price, stop_loss, current_price + (current_price - stop_loss) * 1.5, position_size, current_time)
+                value_of_position = position_size * current_price
+                self.cash -= value_of_position
+                self.trades.append(trade)
+                self.buy_signals.append((current_time, current_price))
+
+        # Sell logic based on Ichimoku
+        for trade in self.trades:
+            if trade.status == 'open':
+                # Sell when Chikou crosses below close price
+                if chikou < current_price:
+                    self.sell(trade, current_time, current_price)
+        
+        # Update EMAs (these can remain for other purposes if needed)
+        self.previous_ema_5000 = current_ema_5000
+        self.previous_ema_20000 = current_ema_20000
+        
+        # Record cash and equity in each iteration
+        self.cash_equity_records.append([current_time, self.cash, equity, 0])
+
+    def sell(self, trade, current_time, current_price):
+        trade.close_trade(current_time, current_price)
+        self.sell_signals.append((current_time, current_price))
+        value_of_position = trade.position_size * current_price
+        self.cash += value_of_position
+        trade.status = 'closed'
+        profit = value_of_position - (trade.position_size * trade.buy_price)
+        print(f'Profit: {profit}')
+
+def load_old_training_data():
+    path = '/home/martin/Documents/backtest/data/reduced_data_with_ichimoku.csv'
+    df = pd.read_csv(path, low_memory=False)
+    return df
+
+def filter_data_by_ema_slope(df):
+    # Calculate slope of the 5000-period EMA
+    df['EMA_5000_slope'] = df['EMA_5000'].diff()
+    
+    # Calculate slope of the 1000-period EMA
+    df['EMA_1000_slope'] = df['EMA_1000'].diff()
+    
+    # Apply the filter: Keep rows where both EMA_5000 and EMA_1000 slopes are positive
+    # and EMA_20000 is less than or equal to EMA_5000
+    filtered_df = df[
+        (df['EMA_5000_slope'] > 0) & 
+        (df['EMA_1000_slope'] > 0) & 
+        (df['EMA_20000'] <= df['EMA_5000'])
+    ]
+    
+    # Optionally drop the slope columns if they are no longer needed
+    filtered_df = filtered_df.drop(columns=['EMA_5000_slope', 'EMA_1000_slope'])
+    
+    return filtered_df
+
+
+# Usage:
+df = load_old_training_data()
+df = df.tail(10000)  # Process last 10,000 rows for example
+df = filter_data_by_ema_slope(df)
+
+simulator = BacktestSimulator(initial_cash=1000)
+df, cash_equity_df = simulator.run_backtest(df)
+
+plot_backtest(df, simulator.buy_signals, simulator.sell_signals, cash_equity_df)

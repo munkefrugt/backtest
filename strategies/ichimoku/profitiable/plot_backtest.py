@@ -21,8 +21,11 @@ def plot_backtest(df, buy_signals, sell_signals, cash_equity_df):
     fig.add_trace(go.Scatter(x=df['date'], y=df['EMA_20000'], mode='lines', name='EMA 20000', line=dict(color='orange')), row=1, col=1)
 
     # Plot Ichimoku Base Line and Conversion Line
-    fig.add_trace(go.Scatter(x=df['date'], y=df['ichimoku_base_line'], mode='lines', name='Ichimoku Base Line', line=dict(color='purple')), row=1, col=1)
-    fig.add_trace(go.Scatter(x=df['date'], y=df['ichimoku_conversion_line'], mode='lines', name='Ichimoku Conversion Line', line=dict(color='green')), row=1, col=1)
+    fig.add_trace(go.Scatter(x=df['date'], y=df['ichimoku_base_line'], mode='lines', name='Ichimoku Base Line', line=dict(color='red')), row=1, col=1)
+    fig.add_trace(go.Scatter(x=df['date'], y=df['ichimoku_conversion_line'], mode='lines', name='Ichimoku Conversion Line', line=dict(color='blue')), row=1, col=1)
+
+    # Plot Ichimoku Chikou Line
+    fig.add_trace(go.Scatter(x=df['date'], y=df['ichimoku_chikou_line'], mode='lines', name='Ichimoku Chikou Line', line=dict(color='pink')), row=1, col=1)
 
     # Plot Ichimoku A and Ichimoku B for the cloud (continuous lines)
     fig.add_trace(go.Scatter(x=df['date'], y=df['ichimoku_a'], mode='lines', name='Ichimoku A', line=dict(color='rgba(0,0,0,0)'), showlegend=False), row=1, col=1)
@@ -44,13 +47,21 @@ def plot_backtest(df, buy_signals, sell_signals, cash_equity_df):
         hoverinfo='skip'
     ), row=1, col=1)
 
-    # Plot buy signals (Green)
-    for signal in buy_signals:
-        fig.add_trace(go.Scatter(x=[signal[0]], y=[signal[1]], mode='markers', name='Buy Signal', marker=dict(color='lime', symbol='triangle-up', size=10)), row=1, col=1)
+    # Plot grouped buy signals (Green)
+    fig.add_trace(go.Scatter(
+        x=[signal[0] for signal in buy_signals], 
+        y=[signal[1] for signal in buy_signals], 
+        mode='markers', name='Buy Signal', 
+        marker=dict(color='lime', symbol='triangle-up', size=10)
+    ), row=1, col=1)
 
-    # Plot sell signals (Red)
-    for signal in sell_signals:
-        fig.add_trace(go.Scatter(x=[signal[0]], y=[signal[1]], mode='markers', name='Sell Signal', marker=dict(color='red', symbol='triangle-down', size=10)), row=1, col=1)
+    # Plot sell signals (Red) without adding to the legend
+    fig.add_trace(go.Scatter(
+        x=[signal[0] for signal in sell_signals], 
+        y=[signal[1] for signal in sell_signals], 
+        mode='markers', marker=dict(color='red', symbol='triangle-down', size=10),
+        showlegend=False
+    ), row=1, col=1)
 
     # Plot equity curve
     if not pd.api.types.is_datetime64_any_dtype(cash_equity_df['date']):
@@ -66,4 +77,3 @@ def plot_backtest(df, buy_signals, sell_signals, cash_equity_df):
 
     # Show plot
     fig.show()
-

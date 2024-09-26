@@ -1,0 +1,1 @@
+['date', 'open', 'high', 'low', 'close', 'ichimoku_base_line', 'ichimoku_conversion_line', 'ichimoku_a', 'ichimoku_b', 'ichimoku_chikou_line', 'Donchian_20_high', 'Donchian_20_low', 'Donchian_10_high', 'Donchian_10_low', 'EMA_50', 'EMA_200', 'EMA_1000', 'EMA_5000', 'EMA_20000']

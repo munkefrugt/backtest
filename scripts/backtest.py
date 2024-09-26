@@ -145,6 +145,8 @@ def load_old_training_data():
 
 
 df = load_old_training_data()
+
+
 # minimize data. sort out negative EMA1000
 # Shift the EMA_1000 column to create a comparison column
 df['EMA_1000_previous'] = df['EMA_1000'].shift(1)

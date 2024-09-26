@@ -1,19 +1,20 @@
 TODO in prioritized order:
+1. only try one strategy. now we are giong with ichimoku. we need to ake it give us 100 trades on the btc data. 
+and then evaluate before we move on to making an oter strategy. 
 
-1.- auto requirement.txt to github.. 
-2. - more data- 10 stocks from s&p 500. get 100 trades minimum. minute timeframe
-3 - get daily data to determine trend.
-3 - store this data for later use.
-
-3.1 make the data ready for making strategies. implement the nessesary "heavy TA" to the CSV file, this wil lmake its esier to proces
+2.1 make the data ready for making strategies. implement the nessesary "heavy TA" to the CSV file, this wil lmake its esier to proces
 
 4- make a strategy database. so you can dont repeat yourself. and you can evaluate the strategies.
 5 build strategies for testing.
+- ichinoku daily?
 
 6 evaluate
-7 choose one-After evaluation, select the best-performing strategy that aligns with your risk tolerance and objectives.
+7 choose one: After evaluation, select the best-performing strategy that aligns with your risk tolerance and objectives.
     Next Steps:
     Fine-tune the chosen strategy based on the evaluation.
     Ensure the strategy is robust by testing it on out-of-sample data.
 
 8 start paper trading
+
+resources:
+https://www.kaggle.com/datasets/arashnic/stock-data-intraday-minute-bar
