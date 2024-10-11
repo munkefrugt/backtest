@@ -2,6 +2,8 @@ import pandas as pd
 import numpy as np
 from trade import Trade
 from plot_backtest import plot_backtest
+from dateutil.relativedelta import relativedelta
+
  
 class BacktestSimulator:
     def __init__(self, initial_cash):
@@ -200,13 +202,54 @@ def filter_data_by_ema_slope(df, ema_5000_threshold=0.01, ema_1000_threshold=0.0
     return filtered_df
 
 
+def filter_data_by_date_range(df, start_year, start_month, months=6):
+    """
+    Filters the dataframe to return data starting from the specified year and month 
+    and includes data for the specified number of months.
 
-# Usage:
+    Args:
+    - df (pd.DataFrame): The dataframe with a 'date' column containing datetime values.
+    - start_year (int): The starting year for the filter.
+    - start_month (int): The starting month for the filter.
+    - months (int): The number of months of data to include.
+
+    Returns:
+    - pd.DataFrame: Filtered dataframe.
+    """
+    # Ensure 'date' column is in datetime format
+    df['date'] = pd.to_datetime(df['date'])
+
+    # Define the start and end dates
+    start_date = pd.Timestamp(year=start_year, month=start_month, day=1)
+    end_date = start_date + relativedelta(months=months)
+
+    # Filter the dataframe
+    return df[(df['date'] >= start_date) & (df['date'] < end_date)]
+
+
+def buy_and_hold_compare_equity(df, cash_equity_df, initial_cash=1000):
+    # Get the first and last closing prices
+    first_price = df['close'].iloc[0]
+    last_price = df['close'].iloc[-1]
+    first_equity = cash_equity_df['equity'].iloc[0]
+    last_equity = cash_equity_df['equity'].iloc[-1]
+
+    # Calculate how much BTC you can buy with the initial cash
+    btc_bought = initial_cash / first_price
+
+    # Calculate the final value of the BTC held at the last price
+    final_value = btc_bought * last_price
+
+    # Calculate the percentage gain
+    percentage_gain_buy_hold = ((final_value - initial_cash) / initial_cash) * 100
+    percentage_gain_equity = ((last_equity - first_equity) / first_equity) * 100
+    # Print results
+    print(f"buy and hold % Gain: {percentage_gain_buy_hold:.2f}%")
+    print(f"equity % Gain: {percentage_gain_equity:.2f}%")
+
 df = load_old_training_data()
-#df = df.tail(200000) 
-df = df.head(1000000) 
-df = df.tail(100000) 
 
+df = filter_data_by_date_range(df, start_year=2014, start_month=2, months=20)
 
 #print(df)
 df['chikou_26_past'] = df['close']
@@ -223,17 +266,15 @@ df['close_26_past'] = df['close'].shift(26)
 columns_to_display = ['date', 'close', 'chikou_26_past','ichimoku_a', 'ichimoku_b','senkou_a_26_past', 'senkou_b_26_past']  # Replace with your actual column names
 pd.set_option('display.max_rows', 50)
 
-#print(df[columns_to_display].head(50))
+print(df.head(2))
 
 df = filter_data_by_ema_slope(df)
-
 
 # # Run backtest
 simulator = BacktestSimulator(initial_cash=1000)
 df, cash_equity_df = simulator.run_backtest(df)
-
 # # Get and print stats
 stats = simulator.get_stats()
 print(stats)
-
+buy_and_hold_compare_equity(df,cash_equity_df)
 plot_backtest(df, simulator.buy_signals, simulator.sell_signals, cash_equity_df)
