@@ -27,6 +27,13 @@ def plot_backtest(df, buy_signals, sell_signals, cash_equity_df):
     # Plot EMAs (first subplot)
     fig.add_trace(go.Scatter(x=df['date'], y=df['EMA_50'], mode='lines', name='EMA 50', line=dict(color='yellow')), row=1, col=1)
     fig.add_trace(go.Scatter(x=df['date'], y=df['EMA_200'], mode='lines', name='EMA 200', line=dict(color='lightblue')), row=1, col=1)
+    fig.add_trace(go.Scatter(x=df['date'], y=df['EMA_1000'], mode='lines', name='EMA 200', line=dict(color='pink')), row=1, col=1)
+    fig.add_trace(go.Scatter(x=df['date'], y=df['EMA_5000'], mode='lines', name='EMA 200', line=dict(color='yellow')), row=1, col=1)
+    fig.add_trace(go.Scatter(x=df['date'], y=df['EMA_20000'], mode='lines', name='EMA 200', line=dict(color='red')), row=1, col=1)
+
+    fig.add_trace(go.Scatter(x=df['date'], y=df['Donchian_20_high'], mode='lines', name='EMA 200', line=dict(color='lightgreen')), row=1, col=1)
+    fig.add_trace(go.Scatter(x=df['date'], y=df['Donchian_10_low'], mode='lines', name='EMA 200', line=dict(color='purple')), row=1, col=1)
+
 
     # Plot Ichimoku Cloud Base and Conversion Line (first subplot)
     fig.add_trace(go.Scatter(x=df['date'], y=df['ichimoku_base_line'], mode='lines', name='Ichimoku Base Line', line=dict(color='red')), row=1, col=1)
