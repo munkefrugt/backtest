@@ -18,7 +18,8 @@ def plot_backtest(df, buy_signals, sell_signals, cash_equity_df):
     # Create subplots with shared x-axis for all rows
     fig = sp.make_subplots(
         rows=4, cols=1, shared_xaxes=True, vertical_spacing=0.02,
-        subplot_titles=('Price & Indicators', 'Equity Curve', 'Cash Curve', 'EMA Slopes')
+        subplot_titles=('Price & Indicators', 'Equity Curve', 'Cash Curve', 'EMA Slopes'),
+        row_heights=[0.5, 0.2, 0.15, 0.15]  # Adjust the relative heights of each subplot
     )
 
     # Plot price data (first subplot)

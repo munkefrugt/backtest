@@ -195,7 +195,7 @@ df['chikou_3_days'] = df['close'].shift(-4320)
 # Filter data by date range
 df = filter_data_by_date_range(df, start_year=2017, start_month=6, months=1)
 #df = df.tail(200)
-df = df.head(1000)
+df = df.head(100)
 df = get_more_ichimoku_indicators(df)
 
 # Calculate slopes for EMAs and acceleration
