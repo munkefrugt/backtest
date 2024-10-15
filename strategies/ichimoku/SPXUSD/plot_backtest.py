@@ -18,21 +18,32 @@ def plot_backtest(df, buy_signals, sell_signals, cash_equity_df):
     # Create subplots with shared x-axis for all rows
     fig = sp.make_subplots(
         rows=4, cols=1, shared_xaxes=True, vertical_spacing=0.02,
-        subplot_titles=('Price & Indicators', 'Equity Curve', 'Cash Curve', 'EMA Slopes')
+        subplot_titles=('Price & Indicators', 'Equity Curve', 'Cash Curve', 'EMA Slopes'),
+        row_heights=[0.5, 0.2, 0.15, 0.15]  # Adjust the relative heights of each subplot
     )
 
     # Plot price data (first subplot)
-    fig.add_trace(go.Scatter(x=df['date'], y=df['close'], mode='lines', name='Close Price', line=dict(color='dodgerblue')), row=1, col=1)
+    fig.add_trace(go.Scatter(x=df['date'], y=df['close'], mode='lines', name='Close Price', line=dict(color='white')), row=1, col=1)
 
-    # Plot EMAs (first subplot)
+    # first subplot
+    
+    #4hour
+    fig.add_trace(go.Scatter(x=df['date'], y=df['senkou_a_4H'], mode='lines', name='senkou_a_4H', line=dict(color='green')), row=1, col=1)
+    fig.add_trace(go.Scatter(x=df['date'], y=df['senkou_b_4H'], mode='lines', name='senkou_b_4H', line=dict(color='red')), row=1, col=1)
+    fig.add_trace(go.Scatter(x=df['date'], y=df['chikou_span_4H'], mode='lines', name='chikou_span_4H', line=dict(color='pink')), row=1, col=1)
+    fig.add_trace(go.Scatter(x=df['date'], y=df['kijun_sen_4H'], mode='lines', name='kijun_sen_4H', line=dict(color='red')), row=1, col=1)
+    fig.add_trace(go.Scatter(x=df['date'], y=df['tenkan_sen_4H'], mode='lines', name='tenkan_sen_4H', line=dict(color='lightblue')), row=1, col=1)
+
+    #EMA's
     fig.add_trace(go.Scatter(x=df['date'], y=df['EMA_50'], mode='lines', name='EMA 50', line=dict(color='yellow')), row=1, col=1)
     fig.add_trace(go.Scatter(x=df['date'], y=df['EMA_200'], mode='lines', name='EMA 200', line=dict(color='lightblue')), row=1, col=1)
-    fig.add_trace(go.Scatter(x=df['date'], y=df['EMA_1000'], mode='lines', name='EMA 200', line=dict(color='pink')), row=1, col=1)
-    fig.add_trace(go.Scatter(x=df['date'], y=df['EMA_5000'], mode='lines', name='EMA 200', line=dict(color='yellow')), row=1, col=1)
-    fig.add_trace(go.Scatter(x=df['date'], y=df['EMA_20000'], mode='lines', name='EMA 200', line=dict(color='red')), row=1, col=1)
-
-    fig.add_trace(go.Scatter(x=df['date'], y=df['Donchian_20_high'], mode='lines', name='EMA 200', line=dict(color='lightgreen')), row=1, col=1)
-    fig.add_trace(go.Scatter(x=df['date'], y=df['Donchian_10_low'], mode='lines', name='EMA 200', line=dict(color='purple')), row=1, col=1)
+    fig.add_trace(go.Scatter(x=df['date'], y=df['EMA_1000'], mode='lines', name='EMA 1000', line=dict(color='pink')), row=1, col=1)
+    fig.add_trace(go.Scatter(x=df['date'], y=df['EMA_5000'], mode='lines', name='EMA 5000', line=dict(color='yellow')), row=1, col=1)
+    fig.add_trace(go.Scatter(x=df['date'], y=df['EMA_20000'], mode='lines', name='EMA 20000', line=dict(color='red')), row=1, col=1)
+    
+    #DC
+    fig.add_trace(go.Scatter(x=df['date'], y=df['Donchian_20_high'], mode='lines', name='DC_20_high', line=dict(color='lightgreen')), row=1, col=1)
+    fig.add_trace(go.Scatter(x=df['date'], y=df['Donchian_10_low'], mode='lines', name='DC 10 low', line=dict(color='purple')), row=1, col=1)
 
 
     # Plot Ichimoku Cloud Base and Conversion Line (first subplot)

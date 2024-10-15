@@ -1,19 +1,2 @@
-make buy conditions to target large uptrends:
-
-buy conditions to add. 
-about slope condition: try a fast moving average of the slope like 10 
-see i you can use that. 
-
-try to implement slopes for the larger ema's
-
-use the 26 clear chikou line. 
-
-close above cloud. 
-
-kijun above tenkan
-
-
-add a cooling period. 
-
-
-fix equity. 
+# fix chikou 4H condition. 
+# make future cloud 4h condition work. 

@@ -4,7 +4,8 @@ from trade import Trade
 from plot_backtest import plot_backtest
 from filter import filter_data_by_date_range, filter_data_by_ema_slope
 from extra_data_preparation import calculate_ema_slopes, get_more_ichimoku_indicators
-from stats import buy_and_hold_compare_equity
+from stats import buy_and_hold_compare_equity, update_streak, get_stats
+from ichimoku_4H import process_and_merge_ichimoku
 
 class BacktestSimulator:
     def __init__(self, initial_cash):
@@ -77,6 +78,20 @@ class BacktestSimulator:
         cloud_top = max(senkou_a, senkou_b)  # This is the cloud top
 
         symbol = "SPX-USD"
+
+        # 4 hour timeframe:
+
+        senkou_a_4H = row['senkou_a_4H'] 
+        senkou_b_4H = row['senkou_b_4H'] 
+        chikou_span_4H  = row['chikou_span_4H'] 
+        kijun_sen_4H = row['kijun_sen_4H'] 
+        tenkan_sen_4H = row['tenkan_sen_4H'] 
+        senkou_a_4H_future = row['senkou_a_4H_future']
+        senkou_b_4H_future = row['senkou_a_4H_future']
+
+        cloud_top_4H = max(senkou_a_4H, senkou_b_4H)  # This is the cloud top
+
+
         already_in_trade = any(trade.status == 'open' for trade in self.trades)
         
         equity = self.cash
@@ -89,17 +104,27 @@ class BacktestSimulator:
         if self.previous_dc_20_high is not None and not already_in_trade:
             # Define a list of conditions (as lambdas)
             buy_conditions = [
-                #lambda: current_ema_1000 > current_ema_5000 > current_ema_20000,  # Long-term golden cross
-                lambda: current_ema_5000 > current_ema_20000,
-                lambda: current_ema_200 > current_ema_1000,
+                #LARGE FILTER
+                lambda: current_ema_1000 > current_ema_5000 > current_ema_20000,  # Long-term golden cross
+                #lambda: current_ema_200 > current_ema_1000 >current_ema_5000 > current_ema_20000,
+                #lambda: current_ema_200 > current_ema_1000,
+                #lambda: current_price > tenkan_sen_4H > kijun_sen_4H > cloud_top_4H,
+                lambda: ema_200_slope > 0,
+
+                # ADD THIS CONDITION!!! 
+                #lambda: chikou_4H_clear(current_time, current_price) , 
+                lambda: current_price > cloud_top_4H,
+                #lambda: senkou_a_4H_future > senkou_b_4H_future,
+
+
+                #SMALL
                 # lambda: row['chikou_3_days'] > current_price,  # Uncomment if needed
                 #lambda: current_ema_50 > current_ema_200,  # EMA 50 > EMA 200
                 #lambda: current_price > self.previous_dc_20_high,  # Breakout above Donchian 20 High
                 #lambda: chikou_past > row['close_26_past'] and chikou_past > max(senkou_a, senkou_b),  # Chikou above cloud
-                lambda: ema_50_slope > ema_200_slope and self.previous_ema_50_slope < self.previous_ema_200_slope,  # EMA 50 slope greater than EMA 200
-                lambda: ema_200_slope > 0,
-                lambda: current_price > self.previous_dc_20_high,
-                lambda: current_price > cloud_top,
+                #lambda: ema_50_slope > ema_200_slope and self.previous_ema_50_slope < self.previous_ema_200_slope,  # EMA 50 slope greater than EMA 200
+                #lambda: current_price > self.previous_dc_20_high,
+                #lambda: current_price > cloud_top,
 
             ]
             
@@ -145,57 +170,27 @@ class BacktestSimulator:
         self.percentage_gains.append(percentage_gain)
 
         self.profits.append(profit)
-        self.update_streak(profit)
+        update_streak(self, profit)
         print(f'Profit: {profit}, Percentage Gain: {percentage_gain:.2f}%')
+        
 
-    def update_streak(self, profit):
-        if profit > 0:
-            if self.current_streak_type == 'win':
-                self.winning_streak += 1
-            else:
-                self.winning_streak = 1
-                self.losing_streak = 0
-            self.current_streak_type = 'win'
-        else:
-            if self.current_streak_type == 'loss':
-                self.losing_streak += 1
-            else:
-                self.losing_streak = 1
-                self.winning_streak = 0
-            self.current_streak_type = 'loss'
-
-        self.max_winning_streak = max(self.max_winning_streak, self.winning_streak)
-        self.max_losing_streak = max(self.max_losing_streak, self.losing_streak)
-
-    def get_stats(self):
-        num_trades = len(self.profits)
-        num_wins = len([p for p in self.profits if p > 0])
-        win_rate = num_wins / num_trades if num_trades > 0 else 0
-        avg_profit = np.mean(self.profits) if self.profits else 0
-        max_drawdown = max(self.drawdowns) if self.drawdowns else 0
-        avg_percentage_gain = np.mean(self.percentage_gains) if self.percentage_gains else 0  # New metric
-
-        return {
-            "win_rate": win_rate,
-            "average_profit": avg_profit,
-            "max_drawdown": max_drawdown,
-            "average_percentage_gain_per_trade": avg_percentage_gain,  # New metric in stats
-            "max_winning_streak": self.max_winning_streak,
-            "max_losing_streak": self.max_losing_streak
-        }
 
 
 # Load the data
 path = '/home/martin/Documents/backtest/data/SPX_USD_2010_18_minute_ichimoku_EMA_DC_copy.csv'
 df = pd.read_csv(path, low_memory=False)
+#change name to date
 df = df.rename(columns={"datetime": "date"})
 
-df['chikou_3_days'] = df['close'].shift(-4320)
+# Run the function to process and merge 4-hour Ichimoku cloud data
+df = process_and_merge_ichimoku(df, 'date')
 
 # Filter data by date range
 df = filter_data_by_date_range(df, start_year=2017, start_month=6, months=1)
 #df = df.tail(200)
-df = df.head(1000)
+df = df.head(900)
+df = df.tail(500)
+
 df = get_more_ichimoku_indicators(df)
 
 # Calculate slopes for EMAs and acceleration
@@ -206,7 +201,7 @@ simulator = BacktestSimulator(initial_cash=1000)
 df, cash_equity_df = simulator.run_backtest(df)
 
 # Get and print stats
-stats = simulator.get_stats()
+stats = get_stats(simulator)  # Pass the simulator object to the function
 print(stats)
 
 # Compare with buy-and-hold strategy
