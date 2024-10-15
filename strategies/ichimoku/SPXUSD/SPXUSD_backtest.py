@@ -188,9 +188,13 @@ df = process_and_merge_ichimoku(df, 'date')
 # Filter data by date range
 df = filter_data_by_date_range(df, start_year=2017, start_month=6, months=1)
 #df = df.tail(200)
+<<<<<<< HEAD
 df = df.head(900)
 df = df.tail(500)
 
+=======
+df = df.head(100)
+>>>>>>> e005c723fe5d58507e035ad3e685911858ab4028
 df = get_more_ichimoku_indicators(df)
 
 # Calculate slopes for EMAs and acceleration
