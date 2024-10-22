@@ -11,8 +11,11 @@ def plot_backtest(df, buy_signals, sell_signals, cash_equity_df):
     fig = sp.make_subplots(rows=3, cols=1, shared_xaxes=True, vertical_spacing=0.02,
                            subplot_titles=('Price & Indicators', 'Equity Curve', 'Cash Curve'))
 
+
+
+
     # Plot price data
-    fig.add_trace(go.Scatter(x=df['date'], y=df['close'], mode='lines', name='Close Price', line=dict(color='dodgerblue')), row=1, col=1)
+    fig.add_trace(go.Scatter(x=df['date'], y=df['close'], mode='lines', name='Close Price', line=dict(color='white')), row=1, col=1)
 
     # Plot Donchian Channels (legends enabled)
     fig.add_trace(go.Scatter(x=df['date'], y=df['Donchian_20_high'], mode='lines', name='DC 20 High', line=dict(color='purple')), row=1, col=1)
@@ -27,7 +30,7 @@ def plot_backtest(df, buy_signals, sell_signals, cash_equity_df):
 
     # Plot Ichimoku Base Line and Conversion Line (legends enabled)
     fig.add_trace(go.Scatter(x=df['date'], y=df['ichimoku_base_line'], mode='lines', name='Ichimoku Base Line', line=dict(color='red')), row=1, col=1)
-    fig.add_trace(go.Scatter(x=df['date'], y=df['ichimoku_conversion_line'], mode='lines', name='Ichimoku Conversion Line', line=dict(color='lightblue')), row=1, col=1)
+    fig.add_trace(go.Scatter(x=df['date'], y=df['ichimoku_conversion_line'], mode='lines', name='Ichimoku Conversion Line', line=dict(color='gray')), row=1, col=1)
 
     # Plot Ichimoku Chikou Line (legend enabled)
     fig.add_trace(go.Scatter(x=df['date'], y=df['ichimoku_chikou_line'], mode='lines', name='Ichimoku Chikou Line', line=dict(color='pink')), row=1, col=1)

@@ -18,7 +18,11 @@ class BacktestSimulator:
         self.previous_ema_200 = None
         self.previous_ema_5000 = None
         self.previous_ema_20000 = None
+
         self.previous_chikou_past = None
+        self.previous_senkou_a_future = None
+        self.previous_senkou_b_future = None
+
         self.cash = initial_cash
         self.equity = initial_cash
         self.trades = []
@@ -36,7 +40,23 @@ class BacktestSimulator:
         self.max_losing_streak = 0
         self.current_streak_type = None
 
+        self.previous_close = None
+
+
+
+
+        # 4 Hour 
+        self.previous_chikou_past_4H  = None
+        self.previous_past_cloud_top_4H  = None
+
+        self.uptrend_4H = False
+        # Store the crossover points (time and price)
+        self.chikou_4H_crossovers_up = []  
+        self.trend_end_4H = []  
+
     def run_backtest(self, df):
+        df['break_up_marker'] = None
+        df['break_down_marker'] = None
         df['equity'] = self.cash
         df['chikou_above_cloud_3_bars'] = df['chikou_26_past'] > df[['senkou_a_26_past', 'senkou_b_26_past']].max(axis=1)
         df['chikou_above_cloud_3_bars'] = df['chikou_above_cloud_3_bars'].rolling(window=3).sum() == 3
@@ -88,44 +108,86 @@ class BacktestSimulator:
         tenkan_sen_4H = row['tenkan_sen_4H'] 
         senkou_a_4H_future = row['senkou_a_4H_future']
         senkou_b_4H_future = row['senkou_a_4H_future']
+        chikou_26_past_4H = row['chikou_26_past_4H']
+        senkou_a_26_past_4H = row['senkou_a_26_past_4H']
+        senkou_b_26_past_4H = row['senkou_b_26_past_4H']
+        already_in_trade = any(trade.status == 'open' for trade in self.trades)
+
+        equity = self.cash
 
         cloud_top_4H = max(senkou_a_4H, senkou_b_4H)  # This is the cloud top
+        past_cloud_top_4H = max(senkou_a_26_past_4H, senkou_b_26_past_4H)
 
 
-        already_in_trade = any(trade.status == 'open' for trade in self.trades)
+        # Check if the chikou breaks through the past cloud top (Break Up)
+        if chikou_26_past_4H > past_cloud_top_4H and (self.previous_chikou_past_4H is not None and self.previous_chikou_past_4H <= past_cloud_top_4H):
+            df.at[current_index, 'break_up_marker'] = chikou_26_past_4H  # Mark the break-up point
+            print(f'Break Up through past cloud at {current_time}, price: {chikou_26_past_4H}')
+            self.uptrend_4H = True
+            self.chikou_4H_crossovers_up.append((current_time, chikou_26_past_4H))
+
+
+        # Check if the chikou breaks down through the past cloud top (Break Down)
+        # if chikou_26_past_4H <= cloud_top_4H and (self.previous_chikou_past_4H is not None and self.previous_chikou_past_4H > cloud_top_4H):
+        #     df.at[current_index, 'break_down_marker'] = chikou_26_past_4H  # Mark the break-down point
+        #     print(f'Break Down through past cloud at {current_time}, price: {chikou_26_past_4H}')
+        #     self.uptrend_4H = False
+        #     self.chikou_crossovers_down.append((current_time, chikou_26_past_4H))
+
+        #check if kijun_sen_4H breaks down through cloud. 
+        if kijun_sen_4H <= cloud_top_4H:
+            if self.uptrend_4H:
+                df.at[current_index, 'break_down_marker'] = kijun_sen_4H  # Mark the break-down point
+                print(f'uptrend_4H ends at {current_time}, price: {kijun_sen_4H}')
+                self.uptrend_4H = False
+                self.trend_end_4H.append((current_time, kijun_sen_4H))
+
         
-        equity = self.cash
         for open_trade in self.trades:
-            if open_trade.status == 'open':
+            if open_trade.status == 'open': 
                 value_of_position = open_trade.position_size * current_price
                 equity += value_of_position
 
+
+                
+        
 
         if self.previous_dc_20_high is not None and not already_in_trade:
             # Define a list of conditions (as lambdas)
             buy_conditions = [
                 #LARGE FILTER
-                lambda: current_ema_1000 > current_ema_5000 > current_ema_20000,  # Long-term golden cross
+                # in use:
+                lambda: self.uptrend_4H,
+
+                #lambda: chikou_26_past_4H > past_cloud_top_4H,
+                #check chikou:
+                #lambda: chikou_26_past_4H > past_cloud_top_4H and self.previous_chikou_past_4H < self.previous_past_cloud_top_4H,
+                #lambda: current_price > past_cloud_top_4H
+                #lambda: current_price > past_cloud_top_4H and self.previous_close < self.previous_past_cloud_top_4H,
+
+                #lambda: current_price > cloud_top_4H,
+                #lambda: senkou_a_4H_future > senkou_b_4H_future,
                 #lambda: current_ema_200 > current_ema_1000 >current_ema_5000 > current_ema_20000,
+
+                
+                #experiments
                 #lambda: current_ema_200 > current_ema_1000,
                 #lambda: current_price > tenkan_sen_4H > kijun_sen_4H > cloud_top_4H,
-                lambda: ema_200_slope > 0,
+                #lambda: ema_200_slope > 0,
 
-                # ADD THIS CONDITION!!! 
-                #lambda: chikou_4H_clear(current_time, current_price) , 
-                lambda: current_price > cloud_top_4H,
-                #lambda: senkou_a_4H_future > senkou_b_4H_future,
 
 
                 #SMALL
                 # lambda: row['chikou_3_days'] > current_price,  # Uncomment if needed
-                #lambda: current_ema_50 > current_ema_200,  # EMA 50 > EMA 200
+                lambda: current_ema_50 > current_ema_200,  # EMA 50 > EMA 200
                 #lambda: current_price > self.previous_dc_20_high,  # Breakout above Donchian 20 High
                 #lambda: chikou_past > row['close_26_past'] and chikou_past > max(senkou_a, senkou_b),  # Chikou above cloud
                 #lambda: ema_50_slope > ema_200_slope and self.previous_ema_50_slope < self.previous_ema_200_slope,  # EMA 50 slope greater than EMA 200
-                #lambda: current_price > self.previous_dc_20_high,
-                #lambda: current_price > cloud_top,
-
+                lambda: current_price > self.previous_dc_20_high,
+                
+                # in use:
+                lambda: current_price > cloud_top,
+                #lambda: senkou_a_future > senkou_b_future and self.previous_senkou_a_future < self.previous_senkou_b_future
             ]
             
             # Check if all buy conditions are met
@@ -140,11 +202,17 @@ class BacktestSimulator:
                 self.cash -= value_of_position
                 self.trades.append(trade)
                 self.buy_signals.append((current_time, current_price))
+                print("time of trade")
+                print(current_time)
 
         for trade in self.trades:
             if trade.status == 'open':
-                if chikou_past < row['close_26_past'] or senkou_a_future < senkou_b_future or current_price < self.previous_dc_10_low:
+                if current_price < cloud_top_4H :
+
+                #if chikou_past < row['close_26_past'] or senkou_a_future < senkou_b_future or current_price < self.previous_dc_10_low:
                     self.sell(trade, current_time, current_price)
+
+        self.previous_close = current_price
         self.previous_dc_20_high = dc_20_high
         self.previous_ema_200 = current_ema_200
         self.previous_ema_5000 = current_ema_5000
@@ -154,7 +222,13 @@ class BacktestSimulator:
 
         self.previous_ema_50_slope = ema_50_slope
         self.previous_ema_200_slope = ema_200_slope
+        self.previous_senkou_a_future = senkou_a_future
+        self.previous_senkou_b_future = senkou_b_future
+        self.previous_chikou_past_4H = chikou_26_past_4H
+        self.previous_past_cloud_top_4H = past_cloud_top_4H
 
+
+        
         self.cash_equity_records.append([current_time, self.cash, equity, 0])
 
     def sell(self, trade, current_time, current_price):
@@ -175,7 +249,6 @@ class BacktestSimulator:
         
 
 
-
 # Load the data
 path = '/home/martin/Documents/backtest/data/SPX_USD_2010_18_minute_ichimoku_EMA_DC_copy.csv'
 df = pd.read_csv(path, low_memory=False)
@@ -186,23 +259,25 @@ df = df.rename(columns={"datetime": "date"})
 df = process_and_merge_ichimoku(df, 'date')
 
 # Filter data by date range
-df = filter_data_by_date_range(df, start_year=2017, start_month=6, months=1)
-#df = df.tail(200)
-<<<<<<< HEAD
-df = df.head(900)
-df = df.tail(500)
+df = filter_data_by_date_range(df, start_year=2015, start_month=1, months=3)
+# Print the times where the chikou 4H crossover occurred (without NaN values)
 
-=======
-df = df.head(100)
->>>>>>> e005c723fe5d58507e035ad3e685911858ab4028
+
+
+#df = df.tail(200)
+#df = df.head(3000)
+#df = df.tail(20000)
+
 df = get_more_ichimoku_indicators(df)
 
 # Calculate slopes for EMAs and acceleration
 df = calculate_ema_slopes(df)
+
 #df = filter_data_by_ema_slope(df)
 # Run backtest
 simulator = BacktestSimulator(initial_cash=1000)
 df, cash_equity_df = simulator.run_backtest(df)
+
 
 # Get and print stats
 stats = get_stats(simulator)  # Pass the simulator object to the function
@@ -211,5 +286,6 @@ print(stats)
 # Compare with buy-and-hold strategy
 buy_and_hold_compare_equity(df, cash_equity_df)
 
+
 # Plot the backtest results, including the slopes and acceleration
-plot_backtest(df, simulator.buy_signals, simulator.sell_signals, cash_equity_df)
+plot_backtest(df, simulator.buy_signals, simulator.sell_signals, cash_equity_df,simulator)

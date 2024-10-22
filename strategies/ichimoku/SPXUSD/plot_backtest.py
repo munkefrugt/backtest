@@ -2,7 +2,7 @@ import plotly.graph_objs as go
 import plotly.subplots as sp
 import pandas as pd
 
-def plot_backtest(df, buy_signals, sell_signals, cash_equity_df):
+def plot_backtest(df, buy_signals, sell_signals, cash_equity_df, simulator):
     # Ensure date is in datetime format
     if not pd.api.types.is_datetime64_any_dtype(df['date']):
         df['date'] = pd.to_datetime(df['date'])
@@ -23,27 +23,56 @@ def plot_backtest(df, buy_signals, sell_signals, cash_equity_df):
     )
 
     # Plot price data (first subplot)
-    fig.add_trace(go.Scatter(x=df['date'], y=df['close'], mode='lines', name='Close Price', line=dict(color='white')), row=1, col=1)
+    fig.add_trace(go.Scatter(x=df['date'], y=df['close'], mode='lines', name='Close Price', line=dict(color='grey')), row=1, col=1)
 
     # first subplot
     
-    #4hour
+    #4 Hour     
+    
+    #fig.add_trace(go.Scatter(x=df['date'], y=df['real_close_as_chikou_4H'], mode='lines', name='real_close_as_chikou_4H', line=dict(color='orange')), row=1, col=1)
+
+    #helper past 4 hour ichimoku remove?
+
+    fig.add_trace(go.Scatter(x=df['date'], y=df['chikou_26_past_4H'], mode='lines', name='chikou_26_past_4H', line=dict(color='cyan')), row=1, col=1)
+    fig.add_trace(go.Scatter(x=df['date'], y=df['senkou_a_26_past_4H'], mode='lines', name='senkou_a_26_past_4H', line=dict(color='yellow')), row=1, col=1)
+    fig.add_trace(go.Scatter(x=df['date'], y=df['senkou_b_26_past_4H'], mode='lines', name='senkou_b_26_past_4H', line=dict(color='orange')), row=1, col=1)
+    #4 Hour extended.    
     fig.add_trace(go.Scatter(x=df['date'], y=df['senkou_a_4H'], mode='lines', name='senkou_a_4H', line=dict(color='green')), row=1, col=1)
     fig.add_trace(go.Scatter(x=df['date'], y=df['senkou_b_4H'], mode='lines', name='senkou_b_4H', line=dict(color='red')), row=1, col=1)
-    fig.add_trace(go.Scatter(x=df['date'], y=df['chikou_span_4H'], mode='lines', name='chikou_span_4H', line=dict(color='pink')), row=1, col=1)
+    fig.add_trace(go.Scatter(x=df['date'], y=df['chikou_span_4H'], mode='lines', name='chikou_span_4H', line=dict(color='orange')), row=1, col=1)
     fig.add_trace(go.Scatter(x=df['date'], y=df['kijun_sen_4H'], mode='lines', name='kijun_sen_4H', line=dict(color='red')), row=1, col=1)
     fig.add_trace(go.Scatter(x=df['date'], y=df['tenkan_sen_4H'], mode='lines', name='tenkan_sen_4H', line=dict(color='lightblue')), row=1, col=1)
 
     #EMA's
     fig.add_trace(go.Scatter(x=df['date'], y=df['EMA_50'], mode='lines', name='EMA 50', line=dict(color='yellow')), row=1, col=1)
     fig.add_trace(go.Scatter(x=df['date'], y=df['EMA_200'], mode='lines', name='EMA 200', line=dict(color='lightblue')), row=1, col=1)
-    fig.add_trace(go.Scatter(x=df['date'], y=df['EMA_1000'], mode='lines', name='EMA 1000', line=dict(color='pink')), row=1, col=1)
+    fig.add_trace(go.Scatter(x=df['date'], y=df['EMA_1000'], mode='lines', name='EMA 1000', line=dict(color='orange')), row=1, col=1)
     fig.add_trace(go.Scatter(x=df['date'], y=df['EMA_5000'], mode='lines', name='EMA 5000', line=dict(color='yellow')), row=1, col=1)
     fig.add_trace(go.Scatter(x=df['date'], y=df['EMA_20000'], mode='lines', name='EMA 20000', line=dict(color='red')), row=1, col=1)
     
     #DC
     fig.add_trace(go.Scatter(x=df['date'], y=df['Donchian_20_high'], mode='lines', name='DC_20_high', line=dict(color='lightgreen')), row=1, col=1)
     fig.add_trace(go.Scatter(x=df['date'], y=df['Donchian_10_low'], mode='lines', name='DC 10 low', line=dict(color='purple')), row=1, col=1)
+
+
+    # Chikou Span Crossover Up markers
+    fig.add_trace(go.Scatter(
+        x=[crossover[0] for crossover in simulator.chikou_4H_crossovers_up], 
+        y=[crossover[1] for crossover in simulator.chikou_4H_crossovers_up], 
+        mode='markers', name='Chikou_4h out of cloud', 
+        marker=dict(color='orange', symbol='circle', size=20)
+    ), row=1, col=1)
+
+    
+    # Chikou Span Crossover Down markers
+    fig.add_trace(go.Scatter(
+        x=[crossover[0] for crossover in simulator.trend_end_4H], 
+        y=[crossover[1] for crossover in simulator.trend_end_4H], 
+        mode='markers', name='trend_end_4H', 
+        marker=dict(color='blue', symbol='circle', size=20)
+    ), row=1, col=1)
+
+
 
 
     # Plot Ichimoku Cloud Base and Conversion Line (first subplot)
@@ -136,7 +165,7 @@ def plot_backtest(df, buy_signals, sell_signals, cash_equity_df):
     ), row=1, col=1)
 
     # Plot equity curve (second subplot)
-    fig.add_trace(go.Scatter(x=cash_equity_df['date'], y=cash_equity_df['equity'], mode='lines', name='Equity Curve', line=dict(color='white')), row=2, col=1)
+    fig.add_trace(go.Scatter(x=cash_equity_df['date'], y=cash_equity_df['equity'], mode='lines', name='Equity Curve', line=dict(color='cyan')), row=2, col=1)
 
     # Plot cash curve (third subplot)
     fig.add_trace(go.Scatter(x=cash_equity_df['date'], y=cash_equity_df['cash'], mode='lines', name='Cash Curve', line=dict(color='yellow')), row=3, col=1)
@@ -148,7 +177,7 @@ def plot_backtest(df, buy_signals, sell_signals, cash_equity_df):
     # Update layout to make sure the x-axis is categorical and aligned across all subplots
     fig.update_layout(
         height=1200, width=1200, title_text='Backtest Results with Cloud and Colorful Vertical Lines', 
-        showlegend=True, template='plotly_dark',
+        showlegend=True,# template='plotly_dark',
     )
     
     # Ensure that all subplots share the same x-axis type (categorical)
@@ -157,5 +186,3 @@ def plot_backtest(df, buy_signals, sell_signals, cash_equity_df):
     # Show plot
     fig.show()
 
-# Example usage: assuming df, buy_signals, sell_signals, and cash_equity_df are defined
-# plot_backtest(df, buy_signals, sell_signals, cash_equity_df)

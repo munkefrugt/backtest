@@ -1,6 +1,6 @@
 import pandas as pd
 
-def process_and_merge_ichimoku(minute_df, date_column='datetime'):
+def process_and_merge_ichimoku(minute_df, date_column='date'):
     """
     Processes the minute-level data to calculate the 4-hour Ichimoku cloud and merge it into the minute-level data.
 
@@ -44,22 +44,27 @@ def process_and_merge_ichimoku(minute_df, date_column='datetime'):
         senkou_b_4H = ((high_52 + low_52) / 2).shift(26)
 
         senkou_a_4H_future = senkou_a_4H.shift(-26)
-
         senkou_b_4H_future = senkou_b_4H.shift(-26)
 
         # Chikou Span (Lagging Span)
         chikou_span_4H = df['close'].shift(-26)
 
+        # Calculate the 26-period past values for Chikou, Senkou A, and Senkou B
+        chikou_span_26_past_4H = chikou_span_4H.shift(26)
+        senkou_a_26_past_4H = senkou_a_4H.shift(26)
+        senkou_b_26_past_4H = senkou_b_4H.shift(26)
 
         ichimoku_df = pd.DataFrame({
             'senkou_a_4H': senkou_a_4H,
             'senkou_b_4H': senkou_b_4H,
             'senkou_a_4H_future': senkou_a_4H_future,
             'senkou_b_4H_future': senkou_b_4H_future,
-
             'chikou_span_4H': chikou_span_4H,
             'kijun_sen_4H': kijun_sen_4H,
-            'tenkan_sen_4H': tenkan_sen_4H
+            'tenkan_sen_4H': tenkan_sen_4H,
+            'chikou_26_past_4H': chikou_span_26_past_4H,  # Past Chikou
+            'senkou_a_26_past_4H': senkou_a_26_past_4H,  # Past Senkou A
+            'senkou_b_26_past_4H': senkou_b_26_past_4H   # Past Senkou B
         })
 
         return ichimoku_df.dropna()
@@ -80,10 +85,19 @@ def process_and_merge_ichimoku(minute_df, date_column='datetime'):
 
         return df
 
+    def add_4h_block_marker(df, date_column):
+        # Create the 4-hour block marker
+        df['4H_block'] = pd.to_datetime(df[date_column]).dt.floor('4H')
+        return df
+
     # Process
     df_4h = resample_to_4h(minute_df, date_column)
     df_ichimoku_4h = calculate_ichimoku_4h(df_4h)
     merged_df = merge_4H_ichimoku(minute_df, df_ichimoku_4h, date_column)
+    merged_df = add_4h_block_marker(merged_df, date_column)
+
+    # Shift by 26 4-hour blocks to get the detailed Chikou Span
+    #merged_df['detailed_chikou_4H'] = merged_df.groupby('4H_block')['close'].shift(-26)
 
     # Create a common integer index
     merged_df['index'] = range(1, len(merged_df) + 1)

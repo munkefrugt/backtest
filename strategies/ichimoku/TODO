@@ -1,5 +1,7 @@
-få ichimoku til at virke
-buy condition: 
-chikou har fornyligt krydset op gennem skyen. ?
+# få ichimoku  4H  til at virke
+# buy condition: 
+# chikou 4H er over skyen
+# check om det virker. 
+# print tidspunktet for krydset
 
-lav et grovere for filter måske skal ema20000 have en vis hældning?
+
