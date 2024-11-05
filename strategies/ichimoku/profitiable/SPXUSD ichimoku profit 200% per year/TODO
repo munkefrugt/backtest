@@ -1,0 +1,6 @@
+brug muligvis den gamle versions handels betingelser. 
+2 prøv lige at få den ide til at virke med at købe når :
+lambda: current_price> ema_10>ema_20>ema_100>ema_200>ema_500>ema_1000>ema_5000,
+lambda: current_price < self.previous_dc_100_high, 
+
+det er måske slope instillingerne der skal væk. 

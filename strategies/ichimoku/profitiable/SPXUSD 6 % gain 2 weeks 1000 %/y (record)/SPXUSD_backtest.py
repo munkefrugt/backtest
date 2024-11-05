@@ -242,7 +242,7 @@ class BacktestSimulator:
             buy_conditions = [
                 #LARGE FILTER
                 # in use:
-                #lambda: self.uptrend_4H,
+                lambda: self.uptrend_4H,
 
                 #lambda: self.uptrend,
 
@@ -319,7 +319,7 @@ class BacktestSimulator:
                 # ichimoku
                 #lambda: kijun_sen > cloud_top ,
                 #lambda: current_price > tenkan_sen > kijun_sen,
-                lambda: current_price > cloud_top_4H ,
+                
 
                 
                 ]

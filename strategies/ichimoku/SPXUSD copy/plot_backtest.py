@@ -25,20 +25,6 @@ def plot_backtest(df, buy_signals, sell_signals, cash_equity_df, simulator):
 
     # first subplot
     
-    #ichimoku 15m
-    fig.add_trace(go.Scatter(x=df['date'], y=df['close_15min'], mode='lines', name='close_15min', line=dict(color='purple')), row=1, col=1)
-
-    fig.add_trace(go.Scatter(x=df['date'], y=df['chikou_26_past_15min'], mode='lines', name='chikou_26_past_15min', line=dict(color='cyan')), row=1, col=1)
-    fig.add_trace(go.Scatter(x=df['date'], y=df['senkou_a_26_past_15min'], mode='lines', name='senkou_a_26_past_15min', line=dict(color='yellow')), row=1, col=1)
-    fig.add_trace(go.Scatter(x=df['date'], y=df['senkou_b_26_past_15min'], mode='lines', name='senkou_b_26_past_15min', line=dict(color='orange')), row=1, col=1)
-    #4 Hour extended.    
-    fig.add_trace(go.Scatter(x=df['date'], y=df['senkou_a_15min'], mode='lines', name='senkou_a_15min', line=dict(color='green')), row=1, col=1)
-    fig.add_trace(go.Scatter(x=df['date'], y=df['senkou_b_15min'], mode='lines', name='senkou_b_15min', line=dict(color='red')), row=1, col=1)
-    fig.add_trace(go.Scatter(x=df['date'], y=df['chikou_span_15min'], mode='lines', name='chikou_span_15min', line=dict(color='orange')), row=1, col=1)
-    fig.add_trace(go.Scatter(x=df['date'], y=df['kijun_sen_15min'], mode='lines', name='kijun_sen_15min', line=dict(color='red')), row=1, col=1)
-    fig.add_trace(go.Scatter(x=df['date'], y=df['tenkan_sen_15min'], mode='lines', name='tenkan_sen_15min', line=dict(color='crimson')), row=1, col=1)
-
-
     #4 Hour     
     
     #fig.add_trace(go.Scatter(x=df['date'], y=df['real_close_as_chikou_4H'], mode='lines', name='real_close_as_chikou_4H', line=dict(color='orange')), row=1, col=1)
@@ -53,8 +39,8 @@ def plot_backtest(df, buy_signals, sell_signals, cash_equity_df, simulator):
     fig.add_trace(go.Scatter(x=df['date'], y=df['senkou_a_4H'], mode='lines', name='senkou_a_4H', line=dict(color='green')), row=1, col=1)
     fig.add_trace(go.Scatter(x=df['date'], y=df['senkou_b_4H'], mode='lines', name='senkou_b_4H', line=dict(color='red')), row=1, col=1)
     fig.add_trace(go.Scatter(x=df['date'], y=df['chikou_span_4H'], mode='lines', name='chikou_span_4H', line=dict(color='orange')), row=1, col=1)
-    fig.add_trace(go.Scatter(x=df['date'], y=df['kijun_sen_4H'], mode='lines', name='kijun_sen_4H', line=dict(color='crimson')), row=1, col=1)
-    fig.add_trace(go.Scatter(x=df['date'], y=df['tenkan_sen_4H'], mode='lines', name='tenkan_sen_4H', line=dict(color='blue')), row=1, col=1)
+    fig.add_trace(go.Scatter(x=df['date'], y=df['kijun_sen_4H'], mode='lines', name='kijun_sen_4H', line=dict(color='red')), row=1, col=1)
+    fig.add_trace(go.Scatter(x=df['date'], y=df['tenkan_sen_4H'], mode='lines', name='tenkan_sen_4H', line=dict(color='lightblue')), row=1, col=1)
 
     # trend_start_4H
     fig.add_trace(go.Scatter(
@@ -75,23 +61,16 @@ def plot_backtest(df, buy_signals, sell_signals, cash_equity_df, simulator):
 
 
     #MINUTE TIMEFRAME
-    #KAMA: 
-    fig.add_trace(go.Scatter(x=df['date'], y=df['KAMA_short'], mode='lines', name='adaptive moving short', line=dict(color='green')), row=1, col=1)
-    fig.add_trace(go.Scatter(x=df['date'], y=df['KAMA_medium'], mode='lines', name='adaptive moving medium', line=dict(color='orange')), row=1, col=1)
-    fig.add_trace(go.Scatter(x=df['date'], y=df['KAMA_long'], mode='lines', name='adaptive moving long', line=dict(color='red')), row=1, col=1)
-    fig.add_trace(go.Scatter(x=df['date'], y=df['KAMA_extra_long'], mode='lines', name='adaptive moving extra long', line=dict(color='purple')), row=1, col=1)
-
 
     #EMA's
-    fig.add_trace(go.Scatter(x=df['date'], y=df['EMA_9'], mode='lines', name='EMA 9', line=dict(color='yellow')), row=1, col=1)
-    fig.add_trace(go.Scatter(x=df['date'], y=df['EMA_21'], mode='lines', name='EMA 21', line=dict(color='red')), row=1, col=1)
-    fig.add_trace(go.Scatter(x=df['date'], y=df['EMA_50'], mode='lines', name='EMA 50', line=dict(color='orange')), row=1, col=1)
+    fig.add_trace(go.Scatter(x=df['date'], y=df['EMA_10'], mode='lines', name='EMA 10', line=dict(color='yellow')), row=1, col=1)
+    fig.add_trace(go.Scatter(x=df['date'], y=df['EMA_20'], mode='lines', name='EMA 20', line=dict(color='green')), row=1, col=1)
+    fig.add_trace(go.Scatter(x=df['date'], y=df['EMA_50'], mode='lines', name='EMA 50', line=dict(color='yellow')), row=1, col=1)
     fig.add_trace(go.Scatter(x=df['date'], y=df['EMA_100'], mode='lines', name='EMA 100', line=dict(color='red')), row=1, col=1)
-    fig.add_trace(go.Scatter(x=df['date'], y=df['EMA_200'], mode='lines', name='EMA 200', line=dict(color='black')), row=1, col=1)
+    fig.add_trace(go.Scatter(x=df['date'], y=df['EMA_200'], mode='lines', name='EMA 200', line=dict(color='lightblue')), row=1, col=1)
     fig.add_trace(go.Scatter(x=df['date'], y=df['EMA_300'], mode='lines', name='EMA 300', line=dict(color='blue')), row=1, col=1)
     fig.add_trace(go.Scatter(x=df['date'], y=df['EMA_500'], mode='lines', name='EMA 500', line=dict(color='purple')), row=1, col=1)
     fig.add_trace(go.Scatter(x=df['date'], y=df['EMA_1000'], mode='lines', name='EMA 1000', line=dict(color='orange')), row=1, col=1)
-    fig.add_trace(go.Scatter(x=df['date'], y=df['EMA_2000'], mode='lines', name='EMA 2000', line=dict(color='blue')), row=1, col=1)
     fig.add_trace(go.Scatter(x=df['date'], y=df['EMA_5000'], mode='lines', name='EMA 5000', line=dict(color='yellow')), row=1, col=1)
     fig.add_trace(go.Scatter(x=df['date'], y=df['EMA_20000'], mode='lines', name='EMA 20000', line=dict(color='red')), row=1, col=1)
     fig.add_trace(go.Scatter(x=df['date'], y=df['EMA_100000'], mode='lines', name='EMA 100000', line=dict(color='yellow')), row=1, col=1)
@@ -111,8 +90,9 @@ def plot_backtest(df, buy_signals, sell_signals, cash_equity_df, simulator):
     
     # Plot price data (first subplot)
     fig.add_trace(go.Scatter(x=df['date'], y=df['close'], mode='lines', name='Close Price', line=dict(color='grey')), row=1, col=1)
-    fig.add_trace(go.Scatter(x=df['date'], y=df['close_26_past'], mode='lines', name='close_26_past', line=dict(color='orange')), row=1, col=1)
-    fig.add_trace(go.Scatter(x=df['date'], y=df['chikou_26_past'], mode='lines', name='chikou_26_past', line=dict(color='orange')), row=1, col=1)
+
+
+    fig.add_trace(go.Scatter(x=df['date'], y=df['close_26_past'], mode='lines', name='chikou_1m', line=dict(color='orange')), row=1, col=1)
 
 
 

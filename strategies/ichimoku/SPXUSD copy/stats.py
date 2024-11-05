@@ -71,26 +71,14 @@ def get_projected_annualized_returns(simulator):
 
     return projected_returns
 
-def calculate_max_drawdown(equity_curve):
-    """
-    Calculate the maximum drawdown from the equity curve.
-    """
-    running_max = np.maximum.accumulate(equity_curve)
-    drawdowns = (running_max - equity_curve) / running_max
-    max_drawdown = np.max(drawdowns) * 100  # Convert to percentage
-    return max_drawdown
-
-def get_stats(simulator, cash_equity_df):
+def get_stats(simulator):
     num_trades = len(simulator.profits)
     num_wins = len([p for p in simulator.profits if p > 0])
     win_rate = num_wins / num_trades * 100 if num_trades > 0 else 0  # Convert to percentage
     avg_profit = np.mean(simulator.profits) if simulator.profits else 0
+    max_drawdown = max(simulator.drawdowns) if simulator.drawdowns else 0
     avg_percentage_gain = np.mean(simulator.percentage_gains) if simulator.percentage_gains else 0  # Already in percentage
     avg_trade_duration = get_average_trade_duration(simulator.trades)
-
-    # Use the equity curve from cash_equity_df to calculate max drawdown
-    equity_curve = cash_equity_df['equity'].values  # Extract equity values as a numpy array
-    max_drawdown = calculate_max_drawdown(equity_curve) if len(equity_curve) > 0 else 0
 
     # Calculate percentage gain per minute, per hour, and per day
     avg_trade_duration_minutes = avg_trade_duration * 60  # Convert hours to minutes
@@ -111,7 +99,7 @@ def get_stats(simulator, cash_equity_df):
     stats = {
         "Win Rate (%)": f"{win_rate:.2f}",
         "Average Profit (USD)": f"{avg_profit:.2f}",
-        "Max Drawdown (%)": f"{max_drawdown:.2f}",
+        "Max Drawdown": f"{max_drawdown:.2f}",
         "Avg Percentage Gain per Trade (%)": f"{avg_percentage_gain:.2f}",
         "Max Winning Streak": f"{simulator.max_winning_streak}",
         "Max Losing Streak": f"{simulator.max_losing_streak}",
